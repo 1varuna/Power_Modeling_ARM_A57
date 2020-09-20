@@ -1,0 +1,2 @@
+Event group selected: 1 (ARM recommended)
+Sampling Interval: 10ms

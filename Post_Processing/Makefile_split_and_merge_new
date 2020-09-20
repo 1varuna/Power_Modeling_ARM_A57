@@ -1,0 +1,425 @@
+# File : Makefile_split_and_merge
+# Author: Varun Anand
+#
+# This Makefile helps automate the process of : 
+# 1: Creating separate directories for each frequency
+# 2. Creating split frequency files
+# 3: creating global merged logs
+# 4: Copy merged log to run_<fan_speed> directory to combine with TEST BM merged log
+
+create_all_folders: create_rodinia_folders create_nvidia_folders create_post_run_dirs
+
+clean_all_dirs: clean_rodinia_dirs clean_nvidia_dirs clean_run_dirs
+
+create_rodinia_folders:	dir_0_rodinia dir_32_rodinia dir_64_rodinia dir_128_rodinia dir_160_rodinia dir_192_rodinia dir_255_rodinia # ALL 
+#create_rodinia_folders:	dir_0_rodinia dir_32_rodinia dir_64_rodinia dir_128_rodinia dir_160_rodinia dir_255_rodinia	# Except 192
+
+create_nvidia_folders:	dir_0_nvidia dir_32_nvidia dir_64_nvidia dir_128_nvidia dir_160_nvidia dir_192_nvidia dir_255_nvidia # ALL 
+#create_nvidia_folders:	dir_0_nvidia dir_32_nvidia dir_64_nvidia dir_128_nvidia dir_160_nvidia dir_255_nvidia	# Except 192
+
+create_post_run_dirs:	create_run_0_dir create_run_32_dir create_run_64_dir create_run_128_dir create_run_160_dir create_run_192_dir create_run_255_dir # ALL
+#create_post_run_dirs:	create_run_0_dir create_run_32_dir create_run_64_dir create_run_128_dir create_run_160_dir create_run_255_dir # Except 192
+
+# Commands to remove previously created directories
+clean_rodinia_dirs: clean_run_0_rodinia clean_run_32_rodinia clean_run_64_rodinia clean_run_128_rodinia clean_run_160_rodinia clean_run_192_rodinia clean_run_255_rodinia
+clean_nvidia_dirs: clean_run_0_nvidia clean_run_32_nvidia clean_run_64_nvidia clean_run_128_nvidia clean_run_160_nvidia clean_run_192_nvidia clean_run_255_nvidia
+clean_run_dirs: clean_run_0_dir clean_run_32_dir clean_run_64_dir clean_run_128_dir clean_run_160_dir clean_run_192_dir clean_run_255_dir
+
+# Commands to create all directories for a particular fan PWM
+create_all_dir_0: dir_0_rodinia dir_0_nvidia create_run_0_dir
+create_all_dir_32: dir_32_rodinia dir_32_nvidia create_run_32_dir
+create_all_dir_64: dir_64_rodinia dir_64_nvidia create_run_64_dir
+create_all_dir_128: dir_128_rodinia dir_128_nvidia create_run_128_dir
+create_all_dir_160: dir_160_rodinia dir_160_nvidia create_run_160_dir
+create_all_dir_192: dir_192_rodinia dir_192_nvidia create_run_192_dir
+create_all_dir_255: dir_255_rodinia dir_255_nvidia create_run_255_dir
+
+# Commands to clean all directories for a particular fan PWM
+clean_all_dir_0: clean_run_0_rodinia clean_run_0_nvidia clean_run_0_dir
+clean_all_dir_32: clean_run_32_rodinia clean_run_32_nvidia clean_run_32_dir
+clean_all_dir_64: clean_run_64_rodinia clean_run_64_nvidia clean_run_64_dir
+clean_all_dir_128: clean_run_128_rodinia clean_run_128_nvidia clean_run_128_dir
+clean_all_dir_160: clean_run_160_rodinia clean_run_160_nvidia clean_run_160_dir
+clean_all_dir_192: clean_run_192_rodinia clean_run_192_nvidia clean_run_192_dir
+clean_all_dir_255: clean_run_255_rodinia clean_run_255_nvidia clean_run_255_dir
+
+# Define Filenames for each .dat file based on fan speed
+FILE_0 := power_a57_rodinia_0.dat
+FILE_32 := power_a57_rodinia_32.dat
+FILE_64 := power_a57_rodinia_64.dat
+FILE_128 := power_a57_rodinia_128.dat
+FILE_160 := power_a57_rodinia_160.dat
+FILE_192 := power_a57_rodinia_192.dat
+FILE_255 := power_a57_rodinia_255.dat
+
+# Define variable to hold global merger python script
+MERGER_SCRIPT := global_merger_nvidia.py
+
+# Define variables to hold path for all .dat files
+FILEPATH_0 := $(shell readlink -f $(FILE_0))
+FILEPATH_32 := $(shell readlink -f $(FILE_32))
+FILEPATH_64 := $(shell readlink -f $(FILE_64))
+FILEPATH_128 := $(shell readlink -f $(FILE_128))
+FILEPATH_160 := $(shell readlink -f $(FILE_160))
+FILEPATH_192 := $(shell readlink -f $(FILE_192))
+FILEPATH_255 := $(shell readlink -f $(FILE_255))
+
+# Define variable to hold path of global merger python script
+MERGER_SCRIPT_PATH := $(shell readlink -f $(MERGER_SCRIPT))
+
+# Create directory to split and merge data files : Fan Speed = 0
+dir_0_rodinia:
+	mkdir run_0_rodinia;\
+	cd run_0_rodinia;\
+	cp -r $(FILEPATH_0) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_0) run_0_rodinia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_0_rodinia rodinia_0;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_0_rodinia/power_measurement_merged_global.txt power_measurement_merged_global_r0.txt
+
+# Command to delete directory created during previous run
+clean_run_0_rodinia:
+	rm -rf run_0_rodinia
+
+# Create directory to split and merge data files : Fan Speed = 32
+dir_32_rodinia:
+	mkdir run_32_rodinia;\
+	cd run_32_rodinia;\
+	cp -r $(FILEPATH_32) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_32) run_32_rodinia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_32_rodinia rodinia_32;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_32_rodinia/power_measurement_merged_global.txt power_measurement_merged_global_r32.txt
+
+# Command to delete directory created during previous run
+clean_run_32_rodinia:
+	rm -rf run_32_rodinia
+
+# Create directory to split and merge data files : Fan Speed = 64
+dir_64_rodinia:
+	mkdir run_64_rodinia;\
+	cd run_64_rodinia;\
+	cp -r $(FILEPATH_64) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_64) run_64_rodinia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_64_rodinia rodinia_64;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_64_rodinia/power_measurement_merged_global.txt power_measurement_merged_global_r64.txt
+
+# Command to delete directory created during previous run
+clean_run_64_rodinia:
+	rm -rf run_64_rodinia
+
+# Create directory to split and merge data files : Fan Speed = 128
+dir_128_rodinia:
+	mkdir run_128_rodinia;\
+	cd run_128_rodinia;\
+	cp -r $(FILEPATH_128) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_128) run_128_rodinia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_128_rodinia rodinia_128;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_128_rodinia/power_measurement_merged_global.txt power_measurement_merged_global_r128.txt
+
+# Command to delete directory created during previous run
+clean_run_128_rodinia:
+	rm -rf run_128_rodinia
+
+# Create directory to split and merge data files : Fan Speed = 160
+dir_160_rodinia:
+	mkdir run_160_rodinia;\
+	cd run_160_rodinia;\
+	cp -r $(FILEPATH_160) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_160) run_160_rodinia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_160_rodinia rodinia_160;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_160_rodinia/power_measurement_merged_global.txt power_measurement_merged_global_r160.txt
+
+# Command to delete directory created during previous run
+clean_run_160_rodinia:
+	rm -rf run_160_rodinia
+
+# Create directory to split and merge data files : Fan Speed = 32
+dir_192_rodinia:
+	mkdir run_192_rodinia;\
+	cd run_192_rodinia;\
+	cp -r $(FILEPATH_192) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_192) run_192_rodinia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_192_rodinia rodinia_192;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_192_rodinia/power_measurement_merged_global.txt power_measurement_merged_global_r192.txt
+
+# Command to delete directory created during previous run
+clean_run_192_rodinia:
+	rm -rf run_192_rodinia
+
+# Create directory to split and merge data files : Fan Speed = 32
+dir_255_rodinia:
+	mkdir run_255_rodinia;\
+	cd run_255_rodinia;\
+	cp -r $(FILEPATH_255) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_255) run_255_rodinia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_255_rodinia rodinia_255;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_255_rodinia/power_measurement_merged_global.txt power_measurement_merged_global_r255.txt
+
+# Command to delete directory created during previous run
+clean_run_255_rodinia:
+	rm -rf run_255_rodinia
+
+# Define Filenames for each .dat file based on fan speed
+FILE_N0 := power_a57_nvidia_0.dat
+FILE_N32 := power_a57_nvidia_32.dat
+FILE_N64 := power_a57_nvidia_64.dat
+FILE_N128 := power_a57_nvidia_128.dat
+FILE_N160 := power_a57_nvidia_160.dat
+FILE_N192 := power_a57_nvidia_192.dat
+FILE_N255 := power_a57_nvidia_255.dat
+
+# Define variables to hold path for all .dat files
+FILEPATH_N0 := $(shell readlink -f $(FILE_N0))
+FILEPATH_N32 := $(shell readlink -f $(FILE_N32))
+FILEPATH_N64 := $(shell readlink -f $(FILE_N64))
+FILEPATH_N128 := $(shell readlink -f $(FILE_N128))
+FILEPATH_N160 := $(shell readlink -f $(FILE_N160))
+FILEPATH_N192 := $(shell readlink -f $(FILE_N192))
+FILEPATH_N255 := $(shell readlink -f $(FILE_N255))
+
+# Define variable to hold path of global merger python script
+#MERGER_SCRIPT_PATH := $(shell readlink -f $(MERGER_SCRIPT))
+
+# Create directory to split and merge data files : Fan Speed = 0
+dir_0_nvidia:
+	mkdir run_0_nvidia;\
+	cd run_0_nvidia;\
+	cp -r $(FILEPATH_N0) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_N0) run_0_nvidia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_0_nvidia nvidia_0;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_0_nvidia/power_measurement_merged_global.txt power_measurement_merged_global_n0.txt
+
+# Command to delete directory created during previous run
+clean_run_0_nvidia:
+	rm -rf run_0_nvidia
+
+# Create directory to split and merge data files : Fan Speed = 32
+dir_32_nvidia:
+	mkdir run_32_nvidia;\
+	cd run_32_nvidia;\
+	cp -r $(FILEPATH_N32) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_N32) run_32_nvidia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_32_nvidia nvidia_32;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_32_nvidia/power_measurement_merged_global.txt power_measurement_merged_global_n32.txt
+
+# Command to delete directory created during previous run
+clean_run_32_nvidia:
+	rm -rf run_32_nvidia
+
+# Create directory to split and merge data files : Fan Speed = 64
+dir_64_nvidia:
+	mkdir run_64_nvidia;\
+	cd run_64_nvidia;\
+	cp -r $(FILEPATH_N64) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_N64) run_64_nvidia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_64_nvidia nvidia_64;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_64_nvidia/power_measurement_merged_global.txt power_measurement_merged_global_n64.txt
+
+# Command to delete directory created during previous run
+clean_run_64_nvidia:
+	rm -rf run_64_nvidia
+
+# Create directory to split and merge data files : Fan Speed = 128
+dir_128_nvidia:
+	mkdir run_128_nvidia;\
+	cd run_128_nvidia;\
+	cp -r $(FILEPATH_N128) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_N128) run_128_nvidia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_128_nvidia nvidia_128;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_128_nvidia/power_measurement_merged_global.txt power_measurement_merged_global_n128.txt
+
+# Command to delete directory created during previous run
+clean_run_128_nvidia:
+	rm -rf run_128_nvidia
+
+# Create directory to split and merge data files : Fan Speed = 160
+dir_160_nvidia:
+	mkdir run_160_nvidia;\
+	cd run_160_nvidia;\
+	cp -r $(FILEPATH_N160) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_N160) run_160_nvidia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_160_nvidia nvidia_160;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_160_nvidia/power_measurement_merged_global.txt power_measurement_merged_global_n160.txt
+
+# Command to delete directory created during previous run
+clean_run_160_nvidia:
+	rm -rf run_160_nvidia
+
+# Create directory to split and merge data files : Fan Speed = 32
+dir_192_nvidia:
+	mkdir run_192_nvidia;\
+	cd run_192_nvidia;\
+	cp -r $(FILEPATH_N192) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_N192) run_192_nvidia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_192_nvidia nvidia_192;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_192_nvidia/power_measurement_merged_global.txt power_measurement_merged_global_n192.txt
+
+# Command to delete directory created during previous run
+clean_run_192_nvidia:
+	rm -rf run_192_nvidia
+
+# Create directory to split and merge data files : Fan Speed = 32
+dir_255_nvidia:
+	mkdir run_255_nvidia;\
+	cd run_255_nvidia;\
+	cp -r $(FILEPATH_N255) .;\
+	cd ..;\
+	# Splitting .dat into individual BM+freq logs
+	python3 splitter_freq.py $(FILE_N255) run_255_nvidia;\
+	# Merging all BM+freq into one global merged log
+	python3 $(MERGER_SCRIPT) run_255_nvidia nvidia_255;\
+	# Copy file onto a separate folder to combine with TEST BM merged log
+	cp -r run_255_nvidia/power_measurement_merged_global.txt power_measurement_merged_global_n255.txt
+
+# Command to delete directory created during previous run
+clean_run_255_nvidia:
+	rm -rf run_255_nvidia
+
+# Create separate directory to merge test and train BM logs - fan speed : 0
+create_run_0_dir:
+	mkdir run_0;\
+	mv power_measurement_merged_global_n0.txt run_0/power_measurement_merged_global_n0.txt;\
+	mv power_measurement_merged_global_r0.txt run_0/power_measurement_merged_global_r0.txt;\
+	echo "\n\t Merging Power Logs... \n";\
+	cd run_0;\
+	cp -r power_measurement_merged_global_r0.txt power_measurement_merged_global.txt;\
+	cat power_measurement_merged_global_n0.txt >> power_measurement_merged_global.txt;\
+	echo "\n\t Merging Power Logs...DONE \n";\
+
+clean_run_0_dir:
+	rm -rf run_0
+
+# Create separate directory to merge test and train BM logs - fan speed : 32
+create_run_32_dir:
+	mkdir run_32;\
+	mv power_measurement_merged_global_n32.txt run_32/power_measurement_merged_global_n32.txt;\
+	mv power_measurement_merged_global_r32.txt run_32/power_measurement_merged_global_r32.txt;\
+	echo "\n\t Merging Power Logs... \n";\
+	cd run_32;\
+	cp -r power_measurement_merged_global_r32.txt power_measurement_merged_global.txt;\
+	cat power_measurement_merged_global_n32.txt >> power_measurement_merged_global.txt;\
+	echo "\n\t Merging Power Logs...DONE \n";\
+
+clean_run_32_dir:
+	rm -rf run_32
+
+# Create separate directory to merge test and train BM logs - fan speed : 64
+create_run_64_dir:
+	mkdir run_64;\
+	mv power_measurement_merged_global_n64.txt run_64/power_measurement_merged_global_n64.txt;\
+	mv power_measurement_merged_global_r64.txt run_64/power_measurement_merged_global_r64.txt;\
+	echo "\n\t Merging Power Logs... \n";\
+	cd run_64;\
+	cp -r power_measurement_merged_global_r64.txt power_measurement_merged_global.txt;\
+	cat power_measurement_merged_global_n64.txt >> power_measurement_merged_global.txt;\
+	echo "\n\t Merging Power Logs...DONE \n";\
+
+clean_run_64_dir:
+	rm -rf run_64
+
+# Create separate directory to merge test and train BM logs - fan speed : 128
+create_run_128_dir:
+	mkdir run_128;\
+	mv power_measurement_merged_global_n128.txt run_128/power_measurement_merged_global_n128.txt;\
+	mv power_measurement_merged_global_r128.txt run_128/power_measurement_merged_global_r128.txt;\
+	echo "\n\t Merging Power Logs... \n";\
+	cd run_128;\
+	cp -r power_measurement_merged_global_r128.txt power_measurement_merged_global.txt;\
+	cat power_measurement_merged_global_n128.txt >> power_measurement_merged_global.txt;\
+	echo "\n\t Merging Power Logs...DONE \n";\
+
+clean_run_128_dir:
+	rm -rf run_128
+
+# Create separate directory to merge test and train BM logs - fan speed : 160
+create_run_160_dir:
+	mkdir run_160;\
+	mv power_measurement_merged_global_n160.txt run_160/power_measurement_merged_global_n160.txt;\
+	mv power_measurement_merged_global_r160.txt run_160/power_measurement_merged_global_r160.txt;\
+	echo "\n\t Merging Power Logs... \n";\
+	cd run_160;\
+	cp -r power_measurement_merged_global_r160.txt power_measurement_merged_global.txt;\
+	cat power_measurement_merged_global_n160.txt >> power_measurement_merged_global.txt;\
+	echo "\n\t Merging Power Logs...DONE \n";\
+
+clean_run_160_dir:
+	rm -rf run_160
+
+# Create separate directory to merge test and train BM logs - fan speed : 192
+create_run_192_dir:
+	mkdir run_192;\
+	mv power_measurement_merged_global_n192.txt run_192/power_measurement_merged_global_n192.txt;\
+	mv power_measurement_merged_global_r192.txt run_192/power_measurement_merged_global_r192.txt;\
+	echo "\n\t Merging Power Logs... \n";\
+	cd run_192;\
+	cp -r power_measurement_merged_global_r192.txt power_measurement_merged_global.txt;\
+	cat power_measurement_merged_global_n192.txt >> power_measurement_merged_global.txt;\
+	echo "\n\t Merging Power Logs...DONE \n";\
+
+clean_run_192_dir:
+	rm -rf run_192
+
+# Create separate directory to merge test and train BM logs - fan speed : 255
+create_run_255_dir:
+	mkdir run_255;\
+	mv power_measurement_merged_global_n255.txt run_255/power_measurement_merged_global_n255.txt;\
+	mv power_measurement_merged_global_r255.txt run_255/power_measurement_merged_global_r255.txt;\
+	echo "\n\t Merging Power Logs... \n";\
+	cd run_255;\
+	cp -r power_measurement_merged_global_r255.txt power_measurement_merged_global.txt;\
+	cat power_measurement_merged_global_n255.txt >> power_measurement_merged_global.txt;\
+	echo "\n\t Merging Power Logs...DONE \n";\
+
+clean_run_255_dir:
+	rm -rf run_255
