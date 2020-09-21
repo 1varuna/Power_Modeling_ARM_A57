@@ -64,8 +64,8 @@ REFERENCES:
 1* GPU Power Model: https://github.com/kranik/ARMPM_BUILDMODEL/tree/GPU_tx1
 2* Original Modeling scripts adopted from Dr Kris Nikov's Doctoral Thesis
 project: https://github.com/kranik/ARMPM_BUILDMODEL/tree/master
-3* Kris Nikov. Robust Energy and Power Predictor Selection. url: https:
-//github.com/TSL-UOB/TP-REPPS
+3* Kris Nikov. Robust Energy and Power Predictor Selection. url: 
+https://github.com/TSL-UOB/TP-REPPS
 4* Kris Nikov and Jose Nunez-Yanez. "Intra and Inter-Core Power Modelling
 for Single-ISA Heterogeneous Processors". In: International Journal
 of Embedded Systems (2020)
